@@ -36,6 +36,23 @@
     "sentiment-analysis",
     "mcp-command-execution"
   ],
+  "skills": [
+    {
+      "id": "feed-analysis",
+      "name": "Feed Analysis",
+      "description": "Analyzes social media feeds for viral potential."
+    },
+    {
+      "id": "oracle-mechanics",
+      "name": "Oracle Mechanics",
+      "description": "Determines prophecy probabilities."
+    },
+    {
+      "id": "mcp-command-execution",
+      "name": "MCP Command Execution",
+      "description": "Executes Model Context Protocol commands."
+    }
+  ],
   "supportedChains": ["eip155:8453"],
   "active": true,
   "status": "online"
