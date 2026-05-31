@@ -26,82 +26,102 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     try {
       const body = req.body || {};
       const method = body.method;
+      const id = body.id; // JSON-RPC 2.0 requies id mapping
 
       if (method === 'initialize') {
         return res.status(200).json({
-          protocolVersion: "2024-11-05",
-          capabilities: {
-            tools: { listChanged: false },
-            prompts: { listChanged: false },
-            resources: { listChanged: false },
-          },
-          serverInfo: {
-            name: "The Feed Oracle Orchestrator",
-            version: "1.0.0"
+          jsonrpc: "2.0",
+          id: id,
+          result: {
+            protocolVersion: "2024-11-05",
+            capabilities: {
+              tools: { listChanged: false },
+              prompts: { listChanged: false },
+              resources: { listChanged: false },
+            },
+            serverInfo: {
+              name: "The Feed Oracle Orchestrator",
+              version: "1.0.0"
+            }
           }
         });
       }
 
       if (method === 'tools/list') {
         return res.status(200).json({
-          tools: [
-            {
-              name: "get_race_status",
-              description: "Get current race status",
-              inputSchema: { type: "object", properties: { raceId: { type: "string" } } }
-            },
-            {
-              name: "start_race",
-              description: "Start a new race",
-              inputSchema: { type: "object", properties: { targetId: { type: "string" } } }
-            },
-            {
-              name: "get_leaderboard",
-              description: "Get leaderboard",
-              inputSchema: { type: "object", properties: { limit: { type: "number" } } }
-            },
-            {
-              name: "optimize_speed",
-              description: "Optimize speed",
-              inputSchema: { type: "object", properties: { agentId: { type: "string" } } }
-            },
-            {
-              name: "get_track_info",
-              description: "Get track information",
-              inputSchema: { type: "object", properties: { trackId: { type: "string" } } }
-            }
-          ]
+          jsonrpc: "2.0",
+          id: id,
+          result: {
+            tools: [
+              {
+                name: "get_race_status",
+                description: "Get current race status",
+                inputSchema: { type: "object", properties: { raceId: { type: "string" } }, required: ["raceId"] }
+              },
+              {
+                name: "start_race",
+                description: "Start a new race",
+                inputSchema: { type: "object", properties: { targetId: { type: "string" } }, required: ["targetId"] }
+              },
+              {
+                name: "get_leaderboard",
+                description: "Get leaderboard",
+                inputSchema: { type: "object", properties: { limit: { type: "number" } }, required: ["limit"] }
+              },
+              {
+                name: "optimize_speed",
+                description: "Optimize speed",
+                inputSchema: { type: "object", properties: { agentId: { type: "string" } }, required: ["agentId"] }
+              },
+              {
+                name: "get_track_info",
+                description: "Get track information",
+                inputSchema: { type: "object", properties: { trackId: { type: "string" } }, required: ["trackId"] }
+              }
+            ]
+          }
         });
       }
 
       if (method === 'tools/call') {
         const { name, arguments: args } = body.params || {};
         return res.status(200).json({
-          content: [{
-            type: "text",
-            text: `Successfully executed ${name} with parameters: ${JSON.stringify(args || {})}`
-          }],
-          isError: false
+          jsonrpc: "2.0",
+          id: id,
+          result: {
+            content: [{
+              type: "text",
+              text: `Successfully executed ${name} with parameters: ${JSON.stringify(args || {})}`
+            }],
+            isError: false
+          }
         });
       }
 
       if (method === 'prompts/list') {
-        return res.status(200).json({ prompts: [] });
+        return res.status(200).json({ jsonrpc: "2.0", id: id, result: { prompts: [] } });
       }
       
       if (method === 'resources/list') {
-        return res.status(200).json({ resources: [] });
+        return res.status(200).json({ jsonrpc: "2.0", id: id, result: { resources: [] } });
       }
 
       return res.status(200).json({
-        status: "success",
-        message: "MCP command received",
-        agent: "The Feed Oracle Orchestrator",
-        receivedAt: new Date().toISOString(),
-        payload: body
+        jsonrpc: "2.0",
+        id: id,
+        result: {
+          status: "success",
+          message: "MCP command received",
+          agent: "The Feed Oracle Orchestrator",
+          receivedAt: new Date().toISOString()
+        }
       });
-    } catch (error) {
-      return res.status(400).json({ error: "Invalid MCP request" });
+    } catch (error: any) {
+      return res.status(400).json({ 
+        jsonrpc: "2.0", 
+        id: null,
+        error: { code: -32700, message: "Invalid MCP request: " + error?.message } 
+      });
     }
   }
 
