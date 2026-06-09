@@ -1,106 +1,54 @@
-import { useAccount, useConnect, useDisconnect, useSendTransaction } from 'wagmi';
-import { CyberButton } from '../components/CyberButton';
-import { Eye, Zap, MessageSquare } from 'lucide-react';
+import React from 'react';
 import { motion } from 'motion/react';
-import { getAttributionPayload, encodeAttributionData } from '../lib/erc8021';
-import { useState } from 'react';
+import { ConnectWallet } from '../components/ConnectWallet';
 
-export function TitleScreen({ onStart }: { onStart: () => void }) {
-  const { isConnected, address } = useAccount();
-  const { connectors, connect } = useConnect();
-  const { disconnect } = useDisconnect();
-  const { sendTransactionAsync } = useSendTransaction();
-  const [gmStatus, setGmStatus] = useState<string | null>(null);
+interface Props {
+  onStart: () => void;
+}
 
-  const handleSayGM = async () => {
-    try {
-      setGmStatus("Saying GM...");
-      const attributionData = getAttributionPayload("SAY_GM");
-      const calldata = encodeAttributionData(attributionData);
-      
-      const tx = await sendTransactionAsync({
-        to: "0x0000000000000000000000000000000000000000",
-        data: calldata,
-        value: 0n,
-      });
-
-      setGmStatus(`GM! Tx: ${tx.slice(0,8)}...`);
-    } catch (err) {
-      console.error(err);
-      setGmStatus("Failed to send GM.");
-    }
-  };
-
+export const TitleScreen: React.FC<Props> = ({ onStart }) => {
   return (
-    <div className="relative z-10 flex flex-col items-center justify-center h-full p-6 text-center">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1 }}
-        className="mb-12"
+    <div className="flex flex-col items-center justify-center min-h-screen relative overflow-hidden bg-black p-6">
+      {/* Background mystical effects */}
+      <div className="absolute inset-0 bg-[#0f001f] opacity-80" />
+      <motion.div 
+        animate={{ rotate: 360 }}
+        transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+        className="absolute w-[150vw] h-[150vw] sm:w-[80vw] sm:h-[80vw] border border-purple-500/10 rounded-full flex items-center justify-center"
       >
-        <div className="flex justify-center mb-6">
-          <Eye className="w-24 h-24 text-purple-500 drop-shadow-[0_0_15px_rgba(168,85,247,0.8)]" />
-        </div>
-        <h1 className="text-5xl md:text-7xl font-bold font-sans tracking-tighter uppercase glitch-text mb-4">
-          The Feed Oracle
-        </h1>
-        <p className="text-cyan-400 font-mono text-lg max-w-md mx-auto drop-shadow-md">
-          See the future. Predict the timeline. Survive the chaos.
-        </p>
+        <div className="w-[80%] h-[80%] border border-cyan-500/10 rounded-full" />
       </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5, duration: 1 }}
-        className="flex flex-col gap-6 items-center w-full max-w-sm"
-      >
-        {isConnected ? (
-          <div className="cyber-panel p-4 w-full flex flex-col items-center gap-3">
-            <div className="flex flex-col items-center">
-              <p className="text-[10px] text-cyan-400 font-mono uppercase">Connected Oracle</p>
-              <p className="text-purple-300 font-mono text-xs break-all">
-                {address}
-              </p>
-            </div>
-            
-            <div className="flex gap-2 w-full mt-2">
-              <CyberButton variant="secondary" onClick={handleSayGM} className="flex-1 py-2 text-xs flex items-center justify-center gap-1">
-                <MessageSquare className="w-4 h-4" /> Say GM
-              </CyberButton>
-              <CyberButton variant="ghost" onClick={() => disconnect()} className="px-3 py-2 text-xs border border-slate-700">
-                Disconnect
-              </CyberButton>
-            </div>
-            {gmStatus && <p className="text-[10px] font-mono text-cyan-300">{gmStatus}</p>}
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2 w-full">
-            <p className="text-[10px] text-cyan-400 font-mono mb-2 uppercase text-center">Connect to log Prophecies on Base</p>
-            {connectors.map((connector) => (
-              <CyberButton
-                key={connector.uid}
-                variant="secondary"
-                onClick={() => connect({ connector })}
-                className="w-full"
-              >
-                Connect {connector.name}
-              </CyberButton>
-            ))}
-          </div>
-        )}
-
-        <CyberButton 
-          variant="primary" 
-          onClick={onStart} 
-          className="w-full py-4 text-xl mt-4 flex items-center justify-center gap-2 font-black"
+      
+      <div className="relative z-10 text-center flex flex-col items-center gap-8">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
         >
-          <Zap className="w-6 h-6" />
-          Enter The Chamber
-        </CyberButton>
+          <h1 className="font-['Cinzel'] text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-purple-400 to-cyan-400 tracking-wider filter drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]">
+            THE FEED<br />ORACLE
+          </h1>
+          <p className="text-purple-300/60 mt-4 text-sm tracking-[0.2em] uppercase font-mono">
+            Glimpse into the chaotic future
+          </p>
+        </motion.div>
 
-      </motion.div>
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="flex flex-col items-center gap-6"
+        >
+          <ConnectWallet />
+          
+          <button 
+            onClick={onStart}
+            className="px-8 py-4 rounded-xl bg-gradient-to-r from-purple-600/20 to-cyan-600/20 hover:from-purple-600/40 hover:to-cyan-600/40 border border-purple-500/50 text-white font-['Cinzel'] text-xl tracking-widest uppercase transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)]"
+          >
+            Enter Chamber
+          </button>
+        </motion.div>
+      </div>
     </div>
   );
-}
+};

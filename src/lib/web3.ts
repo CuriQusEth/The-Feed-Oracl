@@ -1,15 +1,9 @@
-import { http, createConfig } from 'wagmi';
+import { createConfig, http } from 'wagmi';
 import { base } from 'wagmi/chains';
-import { injected } from 'wagmi/connectors';
-import { QueryClient } from '@tanstack/react-query';
 
-export const queryClient = new QueryClient();
-
-export const wagmiConfig = createConfig({
+export const config = createConfig({
   chains: [base],
-  connectors: [injected()],
   transports: {
     [base.id]: http(),
   },
 });
-
